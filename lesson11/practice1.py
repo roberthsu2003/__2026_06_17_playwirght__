@@ -2,15 +2,21 @@ from playwright.sync_api import sync_playwright,Playwright,Browser,Page
 
 
 def crawl(p:Playwright) -> None:
-  browser:Browser = p.chromium.launch(headless=False)
+  browser:Browser = p.chromium.launch()
   page:Page = browser.new_page()
-
   page.goto("https://zh.wikipedia.org")
-  page.get_by_placeholder("搜尋維基百科").first.fill("臺灣")
+  page.get_by_placeholder("搜尋維基百科").nth(1).fill("臺灣")
   page.screenshot(path="screenshot.png")
   page.keyboard.press("Enter")
   page.wait_for_load_state("networkidle")
-  page.wait_for_timeout(10000)
+  first_heading:str = page.locator("#firstHeading").inner_text()
+  print(f"搜尋主題:{first_heading}")
+
+  content:str = page.locator("#mw-content-text p").first.inner_text()
+  print(f"摘要: {content[:100]}")
+  page.go_back()
+  page.wait_for_load_state("networkidle")
+  print(f"返品首頁:{page.title()}")
   browser.close()
 
 
