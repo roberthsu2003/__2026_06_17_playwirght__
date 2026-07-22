@@ -5,7 +5,7 @@ def crawl(p:Playwright) -> None:
   browser:Browser = p.chromium.launch()
   page:Page = browser.new_page()
   page.goto("https://zh.wikipedia.org")
-  page.get_by_placeholder("搜尋維基百科").nth(1).fill("臺灣")
+  page.locator("#searchInput").fill("臺灣")
   page.screenshot(path="screenshot.png")
   page.keyboard.press("Enter")
   page.wait_for_load_state("networkidle")
