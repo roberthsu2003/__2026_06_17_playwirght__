@@ -1,5 +1,4 @@
 from playwright.sync_api import sync_playwright,Playwright,Browser,Page
-import time
 
 
 def crawl(p:Playwright) -> None:
@@ -7,10 +6,10 @@ def crawl(p:Playwright) -> None:
   page:Page = browser.new_page()
 
   page.goto("https://zh.wikipedia.org")
-  page.locator("input.cdx-text-input__input").fill("臺灣")
+  page.get_by_placeholder("搜尋維基百科").first.fill("臺灣")
+  page.screenshot(path="screenshot.png")
   page.wait_for_timeout(10000)
-  time.sleep(10)
-
+  browser.close()
 
 
 with sync_playwright() as p:
