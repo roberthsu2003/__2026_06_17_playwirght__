@@ -1,9 +1,5 @@
-"""
-第04章：等待與同步 - 完整示範
-展示 Playwright 中各種等待策略的實際應用
-"""
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright,Playwright,Browser,Page
 import time
 import os
 
@@ -13,7 +9,7 @@ def get_html_path():
     html_path = os.path.join(current_dir, 'waiting_demo.html')
     return f"file://{html_path}"
 
-def demo_1_delayed_element(page):
+def demo_1_delayed_element(page:Page):
     """示範 1：等待延遲載入的元素"""
     print("\n" + "="*60)
     print("示範 1：等待延遲載入的元素")
@@ -39,7 +35,7 @@ def demo_1_delayed_element(page):
     content = page.locator("#delayed-content").text_content()
     print(f"✓ 內容：{content}")
 
-def demo_2_dynamic_content(page):
+def demo_2_dynamic_content(page:Page):
     """示範 2：等待動態內容載入（模擬 AJAX）"""
     print("\n" + "="*60)
     print("示範 2：等待動態內容載入")
@@ -69,7 +65,7 @@ def demo_2_dynamic_content(page):
     for i, item in enumerate(items, 1):
         print(f"  {i}. {item.text_content()}")
 
-def demo_3_visibility_toggle(page):
+def demo_3_visibility_toggle(page:Page):
     """示範 3：等待元素狀態變化"""
     print("\n" + "="*60)
     print("示範 3：等待元素狀態變化")
@@ -96,7 +92,7 @@ def demo_3_visibility_toggle(page):
     page.wait_for_selector("#toggle-element", state="hidden")
     print("✓ 元素已隱藏")
 
-def demo_4_form_submission(page):
+def demo_4_form_submission(page:Page):
     """示範 4：表單提交與等待"""
     print("\n" + "="*60)
     print("示範 4：表單提交與等待")
@@ -124,7 +120,7 @@ def demo_4_form_submission(page):
     message = page.locator("#submit-message").text_content()
     print(f"✓ 回應訊息：{message}")
 
-def demo_5_batch_loading(page):
+def demo_5_batch_loading(page:Page):
     """示範 5：批次載入元素"""
     print("\n" + "="*60)
     print("示範 5：批次載入元素")
@@ -151,7 +147,7 @@ def demo_5_batch_loading(page):
     items = page.locator("#items-container .item").all()
     print(f"✓ 共載入 {len(items)} 個項目")
 
-def demo_6_api_request(page):
+def demo_6_api_request(page:Page):
     """示範 6：等待 API 請求與回應"""
     print("\n" + "="*60)
     print("示範 6：等待 API 請求與回應")
@@ -175,7 +171,7 @@ def demo_6_api_request(page):
     print("✓ API 回應內容：")
     print(response_text)
 
-def demo_7_load_states(page):
+def demo_7_load_states(page:Page):
     """示範 7：不同的頁面載入狀態"""
     print("\n" + "="*60)
     print("示範 7：頁面載入狀態")
@@ -203,7 +199,7 @@ def demo_7_load_states(page):
     page.wait_for_function("document.body.getAttribute('data-loaded') === 'true'")
     print("✓ 頁面載入完成標記已設定")
 
-def demo_8_timeout_settings(page):
+def demo_8_timeout_settings(page:Page):
     """示範 8：超時時間設定"""
     print("\n" + "="*60)
     print("示範 8：超時時間設定")
@@ -221,6 +217,66 @@ def demo_8_timeout_settings(page):
     except Exception as e:
         print(f"✗ 等待超時：{e}")
 
+def go(p:Playwright):
+  # 啟動瀏覽器（顯示模式）
+  browser:Browser = p.chromium.launch(
+      headless=False,
+      slow_mo=500  # 放慢操作速度以便觀察
+  )
+
+  # 建立新頁面
+  page:Page = browser.new_page()
+
+  # 設定預設超時時間
+  page.set_default_timeout(30000)
+
+  # 取得 HTML 檔案路徑
+  html_path = get_html_path()
+  print(f"\n📄 載入頁面：{html_path}")
+
+  # 載入頁面
+  page.goto(html_path)
+  page.wait_for_load_state("networkidle")
+  print("✓ 頁面載入完成\n")
+
+  # 執行各個示範
+  try:
+      demo_1_delayed_element(page)
+      time.sleep(1)
+
+      demo_2_dynamic_content(page)
+      time.sleep(1)
+
+      demo_3_visibility_toggle(page)
+      time.sleep(1)
+
+      demo_4_form_submission(page)
+      time.sleep(1)
+
+      demo_5_batch_loading(page)
+      time.sleep(1)
+
+      demo_6_api_request(page)
+      time.sleep(1)
+
+      demo_7_load_states(page)
+      time.sleep(1)
+
+      demo_8_timeout_settings(page)
+
+  except Exception as e:
+      print(f"\n❌ 發生錯誤：{e}")
+
+  # 完成
+  print("\n" + "="*60)
+  print("✅ 所有示範完成！")
+  print("="*60)
+  print("\n按 Enter 關閉瀏覽器...")
+  input()
+
+  # 關閉瀏覽器
+  browser.close()
+
 def main():
     """主程式"""
     print("\n" + "🎯 " + "="*58)
@@ -228,64 +284,8 @@ def main():
     print("🎯 " + "="*58)
 
     with sync_playwright() as p:
-        # 啟動瀏覽器（顯示模式）
-        browser = p.chromium.launch(
-            headless=False,
-            slow_mo=500  # 放慢操作速度以便觀察
-        )
+        go(p)
 
-        # 建立新頁面
-        page = browser.new_page()
-
-        # 設定預設超時時間
-        page.set_default_timeout(30000)
-
-        # 取得 HTML 檔案路徑
-        html_path = get_html_path()
-        print(f"\n📄 載入頁面：{html_path}")
-
-        # 載入頁面
-        page.goto(html_path)
-        page.wait_for_load_state("networkidle")
-        print("✓ 頁面載入完成\n")
-
-        # 執行各個示範
-        try:
-            demo_1_delayed_element(page)
-            time.sleep(1)
-
-            demo_2_dynamic_content(page)
-            time.sleep(1)
-
-            demo_3_visibility_toggle(page)
-            time.sleep(1)
-
-            demo_4_form_submission(page)
-            time.sleep(1)
-
-            demo_5_batch_loading(page)
-            time.sleep(1)
-
-            demo_6_api_request(page)
-            time.sleep(1)
-
-            demo_7_load_states(page)
-            time.sleep(1)
-
-            demo_8_timeout_settings(page)
-
-        except Exception as e:
-            print(f"\n❌ 發生錯誤：{e}")
-
-        # 完成
-        print("\n" + "="*60)
-        print("✅ 所有示範完成！")
-        print("="*60)
-        print("\n按 Enter 關閉瀏覽器...")
-        input()
-
-        # 關閉瀏覽器
-        browser.close()
 
 if __name__ == "__main__":
     main()
