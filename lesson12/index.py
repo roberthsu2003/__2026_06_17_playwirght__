@@ -13,6 +13,19 @@ def  element_location_demo(p:Playwright):
   page.goto(f"file://{html_file}")
   print("✓ 已開啟登入頁面")
 
+  # 方法1：使用 get_by_label() - 根據 label 文字定位
+  print("\n使用 get_by_label() 定位輸入欄位...")
+  page.get_by_label("用戶名").fill("admin")
+  print("✓ 已填入用戶名：admin")
+
+  page.get_by_label("密碼").fill("password")
+  print("✓ 已填入密碼：password")
+
+  # 方法2：使用 get_by_role() - 根據元素角色定位
+  print("\n使用 get_by_role() 定位按鈕...")
+  page.get_by_role("button", name="登入").click()
+  print("✓ 已點擊登入按鈕")
+
   print("\n程式執行完成，3 秒後關閉瀏覽器...")
   page.wait_for_timeout(3000)
   browser.close()
