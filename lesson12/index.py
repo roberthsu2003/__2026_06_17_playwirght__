@@ -13,6 +13,8 @@ def  element_location_demo(p:Playwright):
   page.goto(f"file://{html_file}")
   print("✓ 已開啟登入頁面")
 
+  print("\n程式執行完成，3 秒後關閉瀏覽器...")
+  page.wait_for_timeout(3000)
   browser.close()
 
 if __name__ == "__main__":
