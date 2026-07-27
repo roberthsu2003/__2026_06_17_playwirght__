@@ -54,3 +54,8 @@ https://www.youtube.com/watch?v=UCMnQkCRXvk
 https://www.youtube.com/watch?v=GOS-D01wDAc
 
 ---
+
+## 2026_07_27_晚上
+https://www.youtube.com/watch?v=vVL3-aNLEGg
+
+---
