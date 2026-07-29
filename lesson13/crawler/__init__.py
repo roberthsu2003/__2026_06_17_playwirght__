@@ -4,7 +4,8 @@ from datetime import datetime,timedelta
 
 
 def crawl(p: Playwright, cookies_file: str, headless: bool = False,
-          departure_station: str = "台北", arrival_station: str = "台中"):
+          departure_station: str = "台北", arrival_station: str = "台中",
+          departure_date: str | None = None, departure_time: str | None = None):
   browser: Browser = p.chromium.launch(headless=headless)
   try:
     context: BrowserContext = browser.new_context(viewport={"width": 1280, "height": 720})
@@ -15,7 +16,8 @@ def crawl(p: Playwright, cookies_file: str, headless: bool = False,
       page.goto("https://www.thsrc.com.tw/", wait_until="domcontentloaded")
 
       _accept_cookies(page, context, cookies_file)
-      _fill_search_form(page, departure_station, arrival_station)
+      _fill_search_form(page, departure_station, arrival_station,
+                        departure_date, departure_time)
       _click_search(page)
       _wait_for_results(page)
       _print_schedule(page)
@@ -50,18 +52,23 @@ def _accept_cookies(page: Page, context: BrowserContext, cookies_file: str):
     print("⚠ 沒有找到 cookies 對話框，可能已經同意過了")
 
 
-def _fill_search_form(page: Page, departure_station: str, arrival_station: str):
+def _fill_search_form(page: Page, departure_station: str, arrival_station: str,
+                      departure_date: str | None = None,
+                      departure_hour: str | None = None):
   print("正在等待頁面載入...")
 
   page.get_by_label("出發站").select_option(departure_station)
   page.get_by_label("到達站").select_option(arrival_station)
   print(f"✓ 已選擇 {departure_station} → {arrival_station}")
 
-  now: datetime = datetime.now()
-  departure_time: datetime = now + timedelta(hours=1)
-  departure_date = departure_time.strftime("%Y/%m/%d")
-  departure_hour = departure_time.strftime("%H:%M")
-  print(f"\n✓ 自動設定出發時間為：{departure_date} {departure_hour}")
+  if departure_date is None or departure_hour is None:
+    now: datetime = datetime.now()
+    auto_departure_time: datetime = now + timedelta(hours=1)
+    departure_date = departure_date or auto_departure_time.strftime("%Y/%m/%d")
+    departure_hour = departure_hour or auto_departure_time.strftime("%H:%M")
+    print(f"\n✓ 自動設定出發時間為：{departure_date} {departure_hour}")
+  else:
+    print(f"\n✓ 使用指定出發時間：{departure_date} {departure_hour}")
 
   date_input = page.get_by_label("出發日期")
   date_input.click()
