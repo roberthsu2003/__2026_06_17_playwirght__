@@ -59,3 +59,8 @@ https://www.youtube.com/watch?v=GOS-D01wDAc
 https://www.youtube.com/watch?v=vVL3-aNLEGg
 
 ---
+
+## 2026_07_29_晚上
+https://www.youtube.com/live/Odo8to-cmG4?si=CZ2gnBCsx1B4wBL6
+
+---
