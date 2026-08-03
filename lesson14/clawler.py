@@ -1,13 +1,18 @@
 import asyncio
 import os
-import json,datetime
+import json
+from datetime import datetime
 from pprint import pprint
 from playwright.async_api import async_playwright,Browser,BrowserContext
+from typing import Dict, List, Any
 
 # ==============================================================================
 # 0. 專案全域變數設定 (Global Configurations)
 # ==============================================================================
 CONFIG_FILE = "products_config.json" # 商品與賣場組態設定檔
+
+async def monitor_category_async(context: BrowserContext, category_item: Dict[str, Any]) -> Dict[str, Any]:
+  pass
 
 async def main():
   print("=" * 80)
@@ -42,6 +47,17 @@ async def main():
           viewport={"width": 1280, "height": 720},
           user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
         )
+
+        cat_tasks = [monitor_category_async(context, cat) for cat in categories]
+        #print(cat_tasks)
+
+        # asyncio.gather 啟動所有品類 x 品牌 x 賣場 的超大規模平行併發！
+        all_results = await asyncio.gather(*cat_tasks)
+
+        # 釋放資源
+        await context.close()
+        await browser.close()
+
 
 
 
