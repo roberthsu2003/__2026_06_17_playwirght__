@@ -124,6 +124,7 @@ class MainWindow(QMainWindow):
         self.date_edit.setDisplayFormat("yyyy/MM/dd")
         self.date_edit.setDate(QDate(default_dt.year, default_dt.month, default_dt.day))
         self.date_edit.setMinimumDate(QDate.currentDate())
+        self.date_edit.setMaximumDate(QDate.currentDate().addDays(28))
 
         self.time_edit = QTimeEdit()
         self.time_edit.setDisplayFormat("HH:mm")

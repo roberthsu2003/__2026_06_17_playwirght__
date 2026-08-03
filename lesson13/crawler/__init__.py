@@ -6,7 +6,7 @@ from datetime import datetime,timedelta
 def crawl(p: Playwright, cookies_file: str, headless: bool = False,
           departure_station: str = "台北", arrival_station: str = "台中",
           departure_date: str | None = None, departure_time: str | None = None):
-  browser: Browser = p.chromium.launch(headless=headless)
+  browser: Browser = p.firefox.launch(headless=headless)
   try:
     context: BrowserContext = browser.new_context(viewport={"width": 1280, "height": 720})
     try:
@@ -83,6 +83,13 @@ def _fill_search_form(page: Page, departure_station: str, arrival_station: str,
   print(f"✓ 已填入出發時間：{departure_hour}")
 
   page.keyboard.press("Tab")
+
+  filled_date = date_input.input_value()
+  if filled_date != departure_date:
+    raise ValueError(
+      f"日期填寫失敗：網頁欄位顯示「{filled_date}」，"
+      f"高鐵網站僅開放今天起 29 天內（含當日）的日期，請選擇更近的日期。"
+    )
 
 
 def _click_search(page: Page):
