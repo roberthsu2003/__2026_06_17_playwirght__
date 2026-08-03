@@ -19,8 +19,16 @@ async def main():
       return
 
   with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-          config_data = json.load(f)
-          pprint(config_data)
+      config_data = json.load(f)
+      #pprint(config_data)
+
+      categories:list[dict] = config_data.get("monitor_products", [])
+      #pprint(categories)
+      platforms:list[dict] = config_data.get("platforms", [])
+      platform_names = [p["name"] for p in platforms]
+      #print(platform_names)
+      print(f"📦 載入設定完成！監控 {len(categories)} 大品類，跨賣場：{', '.join(platform_names)}...\n")
+
 
 
 if __name__ == "__main__":
