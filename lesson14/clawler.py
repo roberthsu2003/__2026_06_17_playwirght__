@@ -1,7 +1,8 @@
 import asyncio
 import os
-import json
+import json,datetime
 from pprint import pprint
+from playwright.async_api import async_playwright,Browser,BrowserContext
 
 # ==============================================================================
 # 0. 專案全域變數設定 (Global Configurations)
@@ -28,6 +29,19 @@ async def main():
       platform_names = [p["name"] for p in platforms]
       #print(platform_names)
       print(f"📦 載入設定完成！監控 {len(categories)} 大品類，跨賣場：{', '.join(platform_names)}...\n")
+
+      start_time = datetime.now()
+
+      # 2. 啟動 Playwright Async 引擎與 BrowserContext (瀏覽器上下文)
+      async with async_playwright() as p:
+        # headless=True 以背景模式執行（可設定 headless=False 觀察瀏覽器自動化操作過程）
+        browser:Browser = await p.firefox.launch(headless=True)
+
+        # 建立全局 Context，注入通用 User-Agent 與 Viewport
+        context:BrowserContext = await browser.new_context(
+          viewport={"width": 1280, "height": 720},
+          user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+        )
 
 
 
