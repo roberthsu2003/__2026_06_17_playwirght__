@@ -1,0 +1,73 @@
+{
+  "timestamp": "2026-08-06 10:58:57",
+  "elapsed_seconds": 4.93,
+  "platforms": [
+    "PChome 24h",
+    "momo購物網",
+    "Yahoo購物中心"
+  ],
+  "note": "單位與包裝規格不同，無輸出價差比較與優劣分析",
+  "data": [
+    {
+      "category": "貼身衣物手洗精",
+      "maobao_product": {
+        "brand": "毛寶",
+        "name": "毛寶 貼身衣物手洗精",
+        "keyword": "毛寶 貼身衣物手洗精",
+        "stores": [
+          {
+            "platform": "PChome 24h",
+            "title": "貼身衣物手洗精1000gx2入(果漾西西里)",
+            "price": 258,
+            "url": "https://24h.pchome.com.tw/prod/DAAZ7Q-1900FOTV0",
+            "status": "成功"
+          },
+          {
+            "platform": "momo購物網",
+            "title": "未找到相關商品",
+            "price": 0,
+            "url": "",
+            "status": "無結果"
+          },
+          {
+            "platform": "Yahoo購物中心",
+            "title": "未找到相關商品",
+            "price": 0,
+            "url": "",
+            "status": "無結果"
+          }
+        ]
+      },
+      "competitors": [
+        {
+          "brand": "競品品牌A",
+          "name": "競品產品A",
+          "keyword": "競品產品A",
+          "stores": [
+            {
+              "platform": "PChome 24h",
+              "title": "TUF Gaming A16 16吋電競筆電灰色(Ryzen 7 260/16GB/1TB/GeForce RTX5050-8G/FA608UHI-0111A260H)",
+              "price": 43999,
+              "url": "https://24h.pchome.com.tw/prod/DHASAE-A900KAVRZ",
+              "status": "成功"
+            },
+            {
+              "platform": "momo購物網",
+              "title": "未找到相關商品",
+              "price": 0,
+              "url": "",
+              "status": "無結果"
+            },
+            {
+              "platform": "Yahoo購物中心",
+              "title": "未找到相關商品",
+              "price": 0,
+              "url": "",
+              "status": "無結果"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

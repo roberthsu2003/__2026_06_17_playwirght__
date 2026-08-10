@@ -1,0 +1,23 @@
+{
+  "monitor_products": [
+    {
+      "category": "貼身衣物手洗精",
+      "maobao_product": {
+        "name": "毛寶 貼身衣物手洗精",
+        "keyword": "毛寶 貼身衣物手洗精"
+      },
+      "competitors": [
+        {
+          "brand": "競品品牌A",
+          "name": "競品產品A",
+          "keyword": "競品產品A"
+        }
+      ]
+    }
+  ],
+  "platforms": [
+    {"name": "PChome 24h"},
+    {"name": "momo購物網"},
+    {"name": "Yahoo購物中心"}
+  ]
+}
