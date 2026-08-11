@@ -12,8 +12,8 @@ import asyncio
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtGui import QColor
+from PySide6.QtCore import Qt, QThread, Signal, QPropertyAnimation, QEasingCurve
+from PySide6.QtGui import QColor, QIcon, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -187,8 +187,14 @@ class MaobaoDashboard(QMainWindow):
         layout.addWidget(QLabel("📍 目標產品:"))
         self.product_selector = QComboBox()  # 選項於 load_config() 中填入
         self.product_selector.setStyleSheet(
-            "QComboBox { border: 1px solid #CED4DA; border-radius: 8px; padding: 8px; }"
+            "QComboBox { border: 1px solid #CED4DA; border-radius: 8px; padding: 6px 28px 6px 8px; color: #212529; }"
+            "QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right; width: 30px; border-left: 1px solid #CED4DA; border-radius: 0 8px 8px 0; background: #F8F9FA; }"
+            "QComboBox::down-arrow { width: 14px; height: 8px; margin-right: 6px; image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"8\" viewBox=\"0 0 14 8\"><path fill=\"none\" stroke=\"%236C757D\" stroke-width=\"2\" d=\"M1 6.5 L7 1.5 L13 6.5\"/></svg>'); }"
+            "QComboBox QAbstractItemView { background: white; selection-background-color: #007AFF; selection-color: white; }"
+            "QComboBox QAbstractItemView::item { color: #212529; padding: 6px; }"
+            "QComboBox QAbstractItemView::item:hover { background: #E9ECEF; color: #212529; }"
         )
+
         layout.addWidget(self.product_selector)
 
         self.search_btn = QPushButton("🚀 開始搜尋競爭者")
@@ -202,9 +208,19 @@ class MaobaoDashboard(QMainWindow):
         layout.addWidget(self.search_btn)
 
         self.progress_bar = QProgressBar()
+        self.progress_bar.setTextVisible(True)
         self.progress_bar.setStyleSheet(
-            "QProgressBar { height: 8px; border-radius: 4px; }"
-            f"QProgressBar::chunk {{ background-color: {COLOR_PRIMARY}; }}"
+            """
+            QProgressBar {
+                height: 10px; border-radius: 6px; background-color: #E9ECEF;
+                text-align: center; font-weight: bold; color: #212529; font-size: 10px;
+            }
+            QProgressBar::chunk {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #4A90E2, stop:0.5 #007AFF, stop:1 #50C878);
+                border-radius: 6px;
+            }
+            """
         )
         layout.addWidget(self.progress_bar)
 
@@ -254,7 +270,23 @@ class MaobaoDashboard(QMainWindow):
             # 下拉選單顯示商品全名，實際搜尋用的組態存在 userData
             self.product_selector.addItem(category.maobao_product.name, userData=category)
 
+        if self.product_selector.count() > 0:
+            self.product_selector.setCurrentIndex(0)
         self.update_log(f"📦 已載入 {len(self.config.categories)} 項監控產品")
+
+    def _start_completion_pulse(self) -> None:
+        """100% 時啟動進度條脈衝+文字跳動"""
+        if hasattr(self, "_pulse_anim") and self._pulse_anim:
+            return
+        self.progress_bar.setValue(100)
+        self.progress_bar.setMaximum(100)
+        self._pulse_anim = QPropertyAnimation(self.progress_bar, b"value")
+        self._pulse_anim.setDuration(800)
+        self._pulse_anim.setLoopCount(5)  # 改為跳動 5 次後停止
+        self._pulse_anim.setEasingCurve(QEasingCurve.InOutSine)
+        self._pulse_anim.setStartValue(95)
+        self._pulse_anim.setEndValue(100)
+        self._pulse_anim.start()
 
     # ---------- 事件處理 ----------
     def start_analysis(self) -> None:
@@ -278,14 +310,22 @@ class MaobaoDashboard(QMainWindow):
                 item.widget().deleteLater()
         self.log_view.clear()
         self.progress_bar.setValue(0)
+        self.progress_bar.setFormat("%p%")
         self.search_btn.setEnabled(False)
         self.product_selector.setEnabled(False)
+        if hasattr(self, "_pulse_anim"):
+            self._pulse_anim.stop()
+            delattr(self, "_pulse_anim")
 
     def update_log(self, msg: str) -> None:
         self.log_view.append(msg)
 
     def update_progress(self, val: float) -> None:
-        self.progress_bar.setValue(int(val * 100))
+        v = int(val * 100)
+        self.progress_bar.setValue(v)
+        if v >= 100 and not hasattr(self, "_pulse_anim"):
+            self.progress_bar.setFormat("完成 ✓")
+            self._start_completion_pulse()
 
     def add_result_card(self, label: str, info: StoreInfo) -> None:
         """在主執行緒建立卡片（QWidget 不可在背景執行緒建立）"""
