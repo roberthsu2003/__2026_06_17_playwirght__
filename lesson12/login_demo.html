@@ -72,6 +72,27 @@
             outline: none;          /* 移除預設的聚焦外框 */
             border-color: #667eea;  /* 改變邊框顏色為紫藍色 */
         }
+
+        /* 驗證失敗時的輸入框樣式 */
+        input.input-error {
+            border-color: #d32f2f;
+            background-color: #fff8f8;
+        }
+
+        input.input-error:focus {
+            border-color: #d32f2f;
+        }
+
+        /* 欄位驗證錯誤訊息 */
+        .field-error {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .field-error[hidden] {
+            display: none;
+        }
         
         /* 按鈕樣式 */
         button {
@@ -154,7 +175,7 @@
     <div class="login-container">
         <h1>🔐 登入系統</h1>
         
-        <form id="login-form">
+        <form id="login-form" novalidate>
             <div class="form-group">
                 <label for="username">用戶名</label>
                 <input 
@@ -162,8 +183,10 @@
                     id="username" 
                     name="username" 
                     placeholder="請輸入用戶名"
+                    aria-describedby="username-error"
                     required
                 >
+                <p class="field-error" id="username-error" role="alert" hidden></p>
             </div>
             
             <div class="form-group">
@@ -173,8 +196,10 @@
                     id="password" 
                     name="password" 
                     placeholder="請輸入密碼"
+                    aria-describedby="password-error"
                     required
                 >
+                <p class="field-error" id="password-error" role="alert" hidden></p>
             </div>
             
             <button type="submit" id="login-button" role="button">登入</button>
@@ -195,24 +220,86 @@
     </div>
     
     <script>
+        const loginForm = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const usernameError = document.getElementById('username-error');
+        const passwordError = document.getElementById('password-error');
+        const successMessage = document.getElementById('success-message');
+
+        function clearFieldError(input, errorElement) {
+            input.classList.remove('input-error');
+            input.removeAttribute('aria-invalid');
+            errorElement.textContent = '';
+            errorElement.hidden = true;
+        }
+
+        function setFieldError(input, errorElement, message) {
+            input.classList.add('input-error');
+            input.setAttribute('aria-invalid', 'true');
+            errorElement.textContent = message;
+            errorElement.hidden = false;
+        }
+
+        function validateLoginForm() {
+            clearFieldError(usernameInput, usernameError);
+            clearFieldError(passwordInput, passwordError);
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            let firstInvalidInput = null;
+
+            if (!username) {
+                setFieldError(usernameInput, usernameError, '請輸入用戶名。');
+                firstInvalidInput = usernameInput;
+            }
+
+            if (!password.trim()) {
+                setFieldError(passwordInput, passwordError, '請輸入密碼。');
+                firstInvalidInput ??= passwordInput;
+            }
+
+            if (firstInvalidInput) {
+                firstInvalidInput.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        usernameInput.addEventListener('input', function() {
+            clearFieldError(usernameInput, usernameError);
+        });
+
+        passwordInput.addEventListener('input', function() {
+            clearFieldError(passwordInput, passwordError);
+        });
+
         // 監聽表單提交事件
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        loginForm.addEventListener('submit', function(e) {
             e.preventDefault(); // 阻止表單預設的提交行為
+
+            successMessage.classList.remove('show');
+
+            // 先完成欄位驗證，驗證失敗時不得繼續登入流程
+            if (!validateLoginForm()) {
+                return;
+            }
             
             // 取得輸入的用戶名和密碼
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
             
             // 模擬登入驗證（檢查用戶名和密碼是否正確）
             if (username === 'admin' && password === 'password') {
                 // 登入成功：顯示歡迎訊息
                 document.getElementById('welcome-user').textContent = username;
-                document.getElementById('success-message').classList.add('show');
+                successMessage.classList.add('show');
                 
                 // 3 秒後隱藏成功訊息並重置表單
                 setTimeout(() => {
-                    document.getElementById('success-message').classList.remove('show');
-                    document.getElementById('login-form').reset(); // 清空表單
+                    successMessage.classList.remove('show');
+                    loginForm.reset(); // 清空表單
                 }, 3000);
             } else {
                 // 登入失敗：顯示錯誤提示
