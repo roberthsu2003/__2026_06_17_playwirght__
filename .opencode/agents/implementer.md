@@ -1,5 +1,5 @@
 ---
-descriptions: 在指定 worktree 實作單一功能並執行驗證
+description: 在指定 worktree 實作單一功能並執行驗證
 mode: subagent
 permission:
     edit: allow
