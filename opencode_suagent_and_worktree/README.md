@@ -18,18 +18,18 @@
 
 ```mermaid
 graph TD
-    subgraph 客廳大餐桌 (主專案目錄)
+    subgraph MainArea ["客廳大餐桌 (主專案目錄)"]
         Main["main 分支 (乾淨穩定的程式碼)"]
     end
 
-    subgraph 獨立小房間 (Git Worktree)
-        WT["../worktrees/agent-implementer<br>(獨立開發環境 / 隨便改都不怕壞)"]
-        Subagent["🤖 Subagent (實作小幫手)"]
+    subgraph WorktreeArea ["獨立小房間 (Git Worktree)"]
+        WT["../worktrees/agent-implementer<br/>(獨立開發環境 / 隨便改都不怕壞)"]
+        Subagent["Subagent (實作小幫手)"]
         WT --- Subagent
     end
 
-    Main -- "1. 開闢房間 (git worktree add)" --> WT
-    WT -- "2. 驗收後合併成果 (git merge)" --> Main
+    Main -->|"1. 開闢房間 (git worktree add)"| WT
+    WT -->|"2. 驗收後合併成果 (git merge)"| Main
 ```
 
 ---
@@ -147,18 +147,18 @@ git worktree prune
 sequenceDiagram
     autonumber
     actor User as 學生 (你)
-    participant MainAgent as 🤖 主 Agent (總指揮)
-    participant SubAgent as 🤖 Subagent (實作小幫手)
-    participant Git as 💻 終端機與 Git Worktree
+    participant MainAgent as 主 Agent (總指揮)
+    participant SubAgent as Subagent (實作小幫手)
+    participant Git as 終端機與 Git Worktree
 
-    User->>MainAgent: 「請開獨立 worktree，叫 implementer 實作登入功能，驗證後幫我合併」
+    User->>MainAgent: 請開獨立 worktree，叫 implementer 實作登入功能，驗證後幫我合併
     MainAgent->>Git: 自動執行 git worktree add
     MainAgent->>Git: 自動執行 uv sync
     MainAgent->>SubAgent: 自動在該 worktree 啟動並交付任務
     SubAgent->>Git: 在獨立房間撰寫程式碼並執行測試
     SubAgent-->>MainAgent: 回報修改檔案與測試結果
     MainAgent->>Git: 自動執行 git merge 並清理 worktree
-    MainAgent-->>User: 「報告組長，登入功能已實作並成功合併至 main！」
+    MainAgent-->>User: 報告組長，登入功能已實作並成功合併至 main！
 ```
 
 ### 步驟 2-1：主動模式的運作原理
