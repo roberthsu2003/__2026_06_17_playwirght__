@@ -1,147 +1,53 @@
-# 🎓 OpenCode Subagent 與 Git Worktree 學生實戰指南
+# 🎓 OpenCode Subagent 與 Git Worktree 全方位指南：從手動扎馬步到 AI 全自動調度
 
-歡迎來到 **OpenCode Subagent + Git Worktree** 的新手教學！
-如果你覺得 Git 分支或 AI 小幫手（Subagent）聽起來很複雜，別擔心！這篇指南會用最簡單的生活比喻，帶你一步步學會如何讓 AI 幫你寫程式，而且完全不會弄亂你的原始專案。
-
----
-
-## 💡 什麼是 Git Worktree？（生活小比喻）
-
-想像你在做**分組報告**：
-* 🏠 **原本的主目錄（`main` 專案）**：就像**客廳的大餐桌**，大家最終要把完成的報告疊在這裡。
-* 🚪 **Git Worktree**：就像在旁邊**幫 AI 小幫手開一間獨立的小房間（獨立書桌）**。小幫手可以在裡面塗塗改改、嘗試各種寫法，完全不會把客廳餐桌上的東西弄亂！
-
-### 為什麼要這樣做？
-1. **安全隔離**：AI 在獨立房間亂試程式碼，就算寫壞了也不會影響你的主專案。
-2. **平行處理**：你可以開多個房間，讓 AI 助手 A 寫功能一、AI 助手 B 寫功能二，互不干擾。
-3. **成果清晰**：AI 完成後，你可以進房間檢查，覺得滿意再搬回客廳大餐桌（合併）。
+歡迎來到 **OpenCode Subagent + Git Worktree** 的教學手冊！  
+本指南專為**學生與初學者**設計，透過直覺的生活比喻，帶你循序漸進：
+* **Part 1【手動篇】**：親手操作一遍，弄懂 Subagent 與 Worktree 的底層原理。
+* **Part 2【主動篇】**：進階技巧，只要下一道指令，讓「主 Agent（AI 組長）」自動幫你開房間、派工並合併！
 
 ---
 
-## 👥 角色分工
+## 💡 觀念導覽：什麼是 Worktree 與 Subagent？
 
-在 OpenCode 的世界裡，有兩種主要角色：
-
-| 角色 | 比喻 | 職責 |
-| :--- | :--- | :--- |
-| **主 Agent** | **組長 / 總指揮** | 負責拆解任務、幫小幫手開闢 Worktree 房間、審查成果並合併。 |
-| **Subagent** | **組員 / 實作小助手** | 專心待在指定房間裡寫程式與做測試，完成後回報給組長。 |
-
----
-
-## 🚀 5 步驟實戰流程
-
-下面是讓 Subagent 在獨立 Worktree 工作的所有步驟：
+想像你正在做**分組期末專案**：
+* 🏠 **主專案目錄（`main`）**：就像**客廳的大餐桌**，大家最終要把完成的作業放上來。
+* 🚪 **Git Worktree**：就像在旁邊**開闢一間獨立的小房間（獨立書桌）**，專門給 AI 小幫手在裡面寫程式。就算寫壞了，客廳大餐桌上的東西也完全不受影響！
+* 👥 **角色分工**：
+  * **主 Agent（或你自己）** = **組長 / 總指揮**：負責拆解任務、分配房間、審查成果與合併。
+  * **Subagent** = **組員 / 實作小幫手**：專注在指定的獨立房間裡寫程式與做測試，完成後交給組長。
 
 ```mermaid
 graph TD
-    A["Step 1: 建立獨立書桌 (git worktree add)"] --> B["Step 2: 進入房間並準備環境 (cd & uv sync)"]
-    B --> C["Step 3: 叫小幫手開始幹活 (opencode)"]
-    C --> D["Step 4: 組長檢查並合併成果 (git merge)"]
-    D --> E["Step 5: 清理與收拾書桌 (git worktree remove)"]
-```
+    subgraph 客廳大餐桌 (主專案目錄)
+        Main["main 分支 (乾淨穩定的程式碼)"]
+    end
 
-### Step 1: 建立獨立書桌 (Worktree)
+    subgraph 獨立小房間 (Git Worktree)
+        WT["../worktrees/agent-implementer<br>(獨立開發環境 / 隨便改都不怕壞)"]
+        Subagent["🤖 Subagent (實作小幫手)"]
+        WT --- Subagent
+    end
 
-在主專案目錄下，先確認專案狀態，然後新增一個 Worktree：
-
-```bash
-# 1. 檢查目前狀況
-git status --short
-
-# 2. 建立一個名為 agent/implementer 的分支與獨立資料夾
-git worktree add -b agent/implementer ../worktrees/agent-implementer main
-```
-> 💡 **意思解讀**：我們從 `main` 複製了一份乾淨的程式碼，放在 `../worktrees/agent-implementer` 這個新房間裡。
-
----
-
-### Step 2: 進入房間並準備環境
-
-進入剛建好的房間，並使用 `uv` 初始化 Python 環境：
-
-```bash
-# 進入新房間
-cd ../worktrees/agent-implementer
-
-# 使用 uv 安裝專案所需的套件與環境
-uv sync --locked
-
-# (選填) 如果專案有用到 Playwright 瀏覽器自動化，執行下式：
-uv run playwright install
+    Main -- "1. 開闢房間 (git worktree add)" --> WT
+    WT -- "2. 驗收後合併成果 (git merge)" --> Main
 ```
 
 ---
 
-### Step 3: 喚醒 Subagent 小幫手
+## 🛠️ Part 1：【手動篇】一步步親手做（理解原理）
 
-系統怎麼知道要使用哪一位小幫手（Subagent）呢？我們可以用以下兩種方式**「指名召喚」**它：
+> 💡 **學習心法**：先手動走過一遍流程，你才會清楚實體檔案在哪裡、環境怎麼建的。當未來自動化出狀況時，你就能一眼看出問題！
 
-#### 方式 A：進入 OpenCode 後使用 `@` 呼叫（推薦）
-在該房間目錄下啟動 OpenCode：
-```bash
-opencode
-```
-接著在對話框中輸入：
-> 📝 **對話輸入範例**：
-> 「**@implementer** 你現在位於獨立工作區 `agent-implementer`。你的任務是：實作登入頁面表單驗證。請在實作後執行測試命令驗證。完成後請列出修改的檔案與測試結果，不要自行修改其他目錄或直接 push/merge。」
-
-#### 方式 B：在啟動時直接指定 Agent
-```bash
-# 直接以 implementer 角色啟動
-opencode --agent implementer
-
-# 或是直接在終端機一行交付任務：
-opencode run -a implementer "實作登入頁面表單驗證並執行測試"
+```mermaid
+graph LR
+    S1["1. 手動建立 Subagent 檔案"] --> S2["2. 手動建立 Worktree 房間"]
+    S2 --> S3["3. 手動初始化環境 (uv sync)"]
+    S3 --> S4["4. 手動喚醒小幫手 (@implementer)"]
+    S4 --> S5["5. 手動驗收、合併與清理"]
 ```
 
-> 💡 **小知識：OpenCode 怎麼知道它是小幫手？**
-> OpenCode 會讀取專案中 `.opencode/agents/implementer.md` 的設定檔（裡面定義了 `mode: subagent` 與權限限制）。當你加上 `@implementer` 或 `--agent implementer` 時，它就會套用小幫手的規則，乖乖留在指定房間裡工作！
-
----
-
-### Step 4: 組長驗收與合併成果
-
-當 Subagent 完成工作並回報後，**組長（你或主 Agent）**進行驗收：
-
-```bash
-# 1. 在 Worktree 內提交變更
-git add .
-git commit -m "feat: 新增登入頁面表單驗證"
-
-# 2. 回到主專案大餐桌
-cd ../../2026_06_17_playwright  # 切回你的主專案目錄
-git switch main
-
-# 3. 檢查小幫手做了什麼變更
-git diff main...agent/implementer
-
-# 4. 確認沒問題，正式合併！
-git merge --no-ff agent/implementer
-```
-
----
-
-### Step 5: 收拾與清理書桌
-
-當任務順利完成並合併後，把不需要的臨時房間與分支刪除，保持環境整潔：
-
-```bash
-# 1. 移除 Worktree 資料夾
-git worktree remove ../worktrees/agent-implementer
-
-# 2. 刪除已合併的臨時分支
-git branch -d agent/implementer
-
-# 3. 清理 Git 殘留紀錄
-git worktree prune
-```
-
----
-
-### ⚙️ (補充) Subagent 設定檔參考
-
-如果你想在專案中固定 Subagent 的行為，可以在專案的 `.opencode/agents/implementer.md` 放入以下設定：
+### 步驟 1-1：手動建立 Subagent 角色檔案
+在專案根目錄下建立 `.opencode/agents/implementer.md`，給小幫手一張「身份履歷表」：
 
 ```markdown
 ---
@@ -158,28 +64,166 @@ permission:
 不要修改其他 worktree，不要直接 push 或合併。
 完成後請回報修改檔案、commit 訊息與測試驗證結果。
 ```
+> 🔍 **重點解析**：
+> * `mode: subagent`：告訴 OpenCode 它是一個「副手/小助手」。
+> * `external_directory: deny`：給它一道安全護欄，禁止它跑出自己的房間去改別的目錄。
 
 ---
 
-## ⚠️ 學生新手常見避坑指南
+### 步驟 1-2：手動開闢獨立房間 (Worktree)
+在主專案終端機中，確認狀態並新增一個獨立 Worktree：
 
-1. ❌ **忘記切換目錄**：在主專案裡直接叫 Subagent 改程式，這樣就失去了 Worktree 隔離的效果！
-2. ❌ **密碼與敏感資料跟著提交**：切記不要提交 `.env`、API Key 或個人帳密等私密檔案。
-3. ❌ **重複使用同一個房間名**：每次建立 Worktree 請使用唯一的名稱（例如 `agent-feature-a`），避免覆蓋既有成果。
-4. 💡 **遇到合併衝突怎麼辦？**：如果 AI 改的地方剛好你也改到了，Git 會提示衝突。不要害怕，打開檔案找到 `<<<<<<<` 與 `>>>>>>>` 標記，保留正確的程式碼並重新 commit 即可。
+```bash
+# 1. 確認目前 Git 狀態乾淨
+git status --short
 
----
-
-## ⚡ 快速指令記憶卡 (Cheatsheet)
-
-| 操作 | 指令 |
-| :--- | :--- |
-| **列出所有房間** | `git worktree list` |
-| **建新房間** | `git worktree add -b <分支名> <路徑> main` |
-| **安裝環境** | `uv sync --locked` |
-| **刪除房間** | `git worktree remove <路徑>` |
-| **清理紀錄** | `git worktree prune` |
+# 2. 建立新分支 agent/implementer 並在獨立資料夾開闢房間
+git worktree add -b agent/implementer ../worktrees/agent-implementer main
+```
+> 💡 此時 Git 會自動在 `../worktrees/agent-implementer` 建立一份完整的專案複本。
 
 ---
 
-🎉 **恭喜！** 你已經掌握了使用 Subagent 與 Git Worktree 的精髓，快去試試看讓 AI 小幫手在獨立房間為你寫程式吧！
+### 步驟 1-3：手動進入房間並初始化環境
+進入剛建立的房間，並使用 `uv` 建立專屬的虛擬環境：
+
+```bash
+# 進入新房間
+cd ../worktrees/agent-implementer
+
+# 使用 uv 同步套件
+uv sync --locked
+
+# (若專案有 Playwright 需求)
+uv run playwright install
+```
+
+---
+
+### 步驟 1-4：手動喚醒小幫手並指名派工
+在該房間目錄下啟動 OpenCode，並使用 `@` 指名小幫手：
+
+```bash
+opencode
+```
+在對話框中輸入：
+> 📝 **對話輸入範例**：
+> 「**@implementer** 你現在位於獨立工作區 `agent-implementer`。你的任務是：實作登入頁面表單驗證。請在實作後執行測試驗證。完成後請列出修改的檔案與測試結果，不要自行修改其他目錄或直接 push/merge。」
+
+---
+
+### 步驟 1-5：手動驗收、合併與收拾書桌
+當 Subagent 完成並回報後，由你進行驗收與合併：
+
+```bash
+# 1. 在 Worktree 內提交變更
+git add .
+git commit -m "feat: 新增登入頁面表單驗證"
+
+# 2. 回到客廳大餐桌（主專案目錄）
+cd ../../2026_06_17_playwright
+git switch main
+
+# 3. 檢查小幫手改了什麼
+git diff main...agent/implementer
+
+# 4. 確認無誤，正式合併
+git merge --no-ff agent/implementer
+
+# 5. 清理不再需要的房間與分支
+git worktree remove ../worktrees/agent-implementer
+git branch -d agent/implementer
+git worktree prune
+```
+
+---
+
+## 🚀 Part 2：【主動篇】讓主 Agent 成為全能總指揮（進階自動化）
+
+當你熟悉了 Part 1 的手動流程後，你會發現每次手動打這些指令有點繁瑣。  
+這時候，你可以直接讓**主 Agent（總指揮）**幫你一手包辦！
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as 學生 (你)
+    participant MainAgent as 🤖 主 Agent (總指揮)
+    participant SubAgent as 🤖 Subagent (實作小幫手)
+    participant Git as 💻 終端機與 Git Worktree
+
+    User->>MainAgent: 「請開獨立 worktree，叫 implementer 實作登入功能，驗證後幫我合併」
+    MainAgent->>Git: 自動執行 git worktree add
+    MainAgent->>Git: 自動執行 uv sync
+    MainAgent->>SubAgent: 自動在該 worktree 啟動並交付任務
+    SubAgent->>Git: 在獨立房間撰寫程式碼並執行測試
+    SubAgent-->>MainAgent: 回報修改檔案與測試結果
+    MainAgent->>Git: 自動執行 git merge 並清理 worktree
+    MainAgent-->>User: 「報告組長，登入功能已實作並成功合併至 main！」
+```
+
+### 步驟 2-1：主動模式的運作原理
+主 Agent 本身具備執行終端機命令與調度檔案的能力。只要你在主專案給予它足夠明確的指示，它就能自動在背後依序完成「開 Worktree ➔ 環境同步 ➔ 調度 Subagent ➔ 跑測試 ➔ 合併 ➔ 清理」的所有步驟。
+
+---
+
+### 步驟 2-2：主動讓主 Agent 建立/擴充 Subagent 角色
+如果你想新增一個新角色（例如專門寫測試的 `tester` 或審查程式碼的 `reviewer`），你不需要自己手動寫 Markdown 檔，直接跟主 Agent 說：
+
+> 🗣️ **對主 Agent 說**：
+> 「請幫我在 `.opencode/agents/` 下新增一個名為 `tester.md` 的 subagent 角色，限制它只能在指定 worktree 內撰寫與執行 pytest 測試，禁止修改主程式與外部目錄。」
+
+主 Agent 就會自動產生結構標準、權限正確的 Subagent 設定檔！
+
+---
+
+### 步驟 2-3：一句話全自動派工（開房間 ➔ 實作 ➔ 合併）
+在主專案目錄下啟動 `opencode`，直接對主 Agent 下達完整指令：
+
+> 🗣️ **對主 Agent 的全自動提示詞 (Prompt)**：
+> 「我需要實作登入驗證功能。請幫我：
+> 1. 建立一個獨立的 git worktree（路徑 `../worktrees/agent-login`，分支 `agent/login`）。
+> 2. 執行 `uv sync` 初始化環境。
+> 3. 指派 `@implementer` 在該 worktree 實作功能並執行測試。
+> 4. 測試通過後，將分支合併回 `main` 並自動清理該 worktree。」
+
+主 Agent 就會開始像總指揮一樣，一步步幫你調度終端機與 Subagent，完成後向你回報成果！
+
+---
+
+### 步驟 2-4：人類組長的最終把關（安全審查）
+雖然主 Agent 能全自動處理，但作為程式開發者的你，依然需要做最後的審查（Review）：
+* 隨時使用 `git log -n 5` 查看最近合併的 commit 紀錄。
+* 若發現 AI 自動合併的內容有疑慮，可隨時用 `git log -p` 或 `git revert` 輕鬆復原。
+
+---
+
+## 📊 Part 3：手動 vs 主動對照表與快速記憶卡
+
+### ⚖️ 模式比較：什麼時候用哪種？
+
+| 比較項目 | 🛠️ 手動模式 (Part 1) | 🚀 主動 / 自動模式 (Part 2) |
+| :--- | :--- | :--- |
+| **操作難度** | 需要手動輸入 5~6 個 Git 與 uv 指令 | 只要對主 Agent 說一句話 |
+| **透明度與控制感** | ⭐⭐⭐⭐⭐（每一步都看得到、摸得著） | ⭐⭐⭐（由主 Agent 代勞，背景執行） |
+| **適合學習階段** | **新手入門、初學者打底** | **熟悉流程後、追求高效率開發** |
+| **適用情境** | 單一小修改、想精確調校每個步驟 | 大型專案、同時指派多個平行任務 |
+
+---
+
+### ⚡ 常用指令速查卡 (Cheatsheet)
+
+| 操作類別 | 常用指令 | 說明 |
+| :--- | :--- | :--- |
+| **查看房間** | `git worktree list` | 列出目前所有已開闢的 Worktree 與分支 |
+| **新增房間** | `git worktree add -b <分支名> <資料夾路徑> main` | 從 main 複製一份乾淨程式碼到獨立資料夾 |
+| **環境同步** | `uv sync --locked` | 在獨立房間內安裝專案所需依賴套件 |
+| **檢查差異** | `git diff main...<分支名>` | 比對小幫手修改的內容與 main 有何不同 |
+| **合併成果** | `git merge --no-ff <分支名>` | 將小幫手的成果合併回 main 分支 |
+| **刪除房間** | `git worktree remove <資料夾路徑>` | 任務完成後移除臨時資料夾 |
+| **清理紀錄** | `git worktree prune` | 清理已被刪除資料夾的 Git 殘留指標 |
+| **刪除分支** | `git branch -d <分支名>` | 刪除已合併完成的任務分支 |
+
+---
+
+🎉 **學習總結**：
+先透過【手動篇】熟悉「獨立房間」的概念與指令，再透過【主動篇】體驗 AI 總指揮帶來的極致效率！
