@@ -44,17 +44,13 @@ uv --version
 opencode --version
 ~~~
 
-若主工作目錄有未提交變更，先明確提交、暫存或保留，避免誤帶到新任務。建立 worktree：
+若主工作目錄有未提交變更，先明確提交、暫存或保留，避免誤帶到新任務。建立一個實作任務用的 worktree：
 
 ~~~bash
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-WORKTREE_ROOT="${WORKTREE_ROOT:-$REPO_ROOT/../worktrees}"
-
-mkdir -p "$WORKTREE_ROOT"
-git worktree add -b agent/implementer "$WORKTREE_ROOT/agent-implementer" main
-git worktree add -b agent/tester "$WORKTREE_ROOT/agent-tester" main
-git worktree list
+git worktree add -b agent/implementer ../worktrees/agent-implementer main
 ~~~
+
+Git 會自動建立 `../worktrees/agent-implementer` 資料夾，並將 `main` 分支的專案檔案放入其中。執行後可用 `git worktree list` 確認。
 
 每個 branch 與 worktree 路徑都必須唯一。不要使用 -B 或 --force 覆蓋既有成果。若要從遠端最新版本開始，先執行 git fetch origin --prune，確認基準後再建立 worktree。
 
@@ -63,7 +59,7 @@ git worktree list
 每個 worktree 都要使用自己的 uv 環境：
 
 ~~~bash
-cd "$WORKTREE_ROOT/agent-implementer"
+cd ../worktrees/agent-implementer
 uv sync --locked
 uv run python --version
 opencode
@@ -117,11 +113,8 @@ git merge --no-ff agent/implementer
 確認 branch 已整合、worktree 沒有未提交變更後：
 
 ~~~bash
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-WORKTREE_ROOT="${WORKTREE_ROOT:-$REPO_ROOT/../worktrees}"
-
-git -C "$WORKTREE_ROOT/agent-implementer" status --short
-git worktree remove "$WORKTREE_ROOT/agent-implementer"
+git -C ../worktrees/agent-implementer status --short
+git worktree remove ../worktrees/agent-implementer
 git branch -d agent/implementer
 git worktree prune
 ~~~
