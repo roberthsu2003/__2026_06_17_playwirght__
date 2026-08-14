@@ -75,16 +75,28 @@ uv run playwright install
 
 ### Step 3: 喚醒 Subagent 小幫手
 
-在該房間目錄下啟動 OpenCode：
+系統怎麼知道要使用哪一位小幫手（Subagent）呢？我們可以用以下兩種方式**「指名召喚」**它：
 
+#### 方式 A：進入 OpenCode 後使用 `@` 呼叫（推薦）
+在該房間目錄下啟動 OpenCode：
 ```bash
 opencode
 ```
+接著在對話框中輸入：
+> 📝 **對話輸入範例**：
+> 「**@implementer** 你現在位於獨立工作區 `agent-implementer`。你的任務是：實作登入頁面表單驗證。請在實作後執行測試命令驗證。完成後請列出修改的檔案與測試結果，不要自行修改其他目錄或直接 push/merge。」
 
-給 Subagent 一個清楚的指令（Prompt 範例）：
+#### 方式 B：在啟動時直接指定 Agent
+```bash
+# 直接以 implementer 角色啟動
+opencode --agent implementer
 
-> 📝 **給小幫手的任務交代**：
-> 「你現在位於獨立工作區 `agent-implementer`。你的任務是：實作登入頁面表單驗證。請在實作後執行測試命令驗證。完成後請列出修改的檔案與測試結果，不要自行修改其他目錄或直接 push/merge。」
+# 或是直接在終端機一行交付任務：
+opencode run -a implementer "實作登入頁面表單驗證並執行測試"
+```
+
+> 💡 **小知識：OpenCode 怎麼知道它是小幫手？**
+> OpenCode 會讀取專案中 `.opencode/agents/implementer.md` 的設定檔（裡面定義了 `mode: subagent` 與權限限制）。當你加上 `@implementer` 或 `--agent implementer` 時，它就會套用小幫手的規則，乖乖留在指定房間裡工作！
 
 ---
 
