@@ -1,22 +1,137 @@
-# OpenCode Subagent 與 Git Worktree
+# 🎓 OpenCode Subagent 與 Git Worktree 學生實戰指南
 
-本文件說明如何讓 OpenCode 的 subagent 各自使用獨立 Git worktree，安全地平行處理任務。完整規劃請參閱 repository 根目錄的 PRD.md。
+歡迎來到 **OpenCode Subagent + Git Worktree** 的新手教學！
+如果你覺得 Git 分支或 AI 小幫手（Subagent）聽起來很複雜，別擔心！這篇指南會用最簡單的生活比喻，帶你一步步學會如何讓 AI 幫你寫程式，而且完全不會弄亂你的原始專案。
 
-## 核心原則
+---
 
-採用「一個 subagent、一個唯一任務分支、一個獨立 worktree」：
+## 💡 什麼是 Git Worktree？（生活小比喻）
 
-- 主 agent 負責拆解任務、建立 worktree、審查與合併。
-- 每個 subagent 只在指定 worktree 中工作。
-- 每個 worktree 使用唯一 branch，不共用同一個 checkout。
-- 合併前必須完成 review 與專案實際測試。
-- worktree 不會隔離共享資料庫、服務、port、外部 API 或秘密。
+想像你在做**分組報告**：
+* 🏠 **原本的主目錄（`main` 專案）**：就像**客廳的大餐桌**，大家最終要把完成的報告疊在這裡。
+* 🚪 **Git Worktree**：就像在旁邊**幫 AI 小幫手開一間獨立的小房間（獨立書桌）**。小幫手可以在裡面塗塗改改、嘗試各種寫法，完全不會把客廳餐桌上的東西弄亂！
 
-## OpenCode Subagent 設定
+### 為什麼要這樣做？
+1. **安全隔離**：AI 在獨立房間亂試程式碼，就算寫壞了也不會影響你的主專案。
+2. **平行處理**：你可以開多個房間，讓 AI 助手 A 寫功能一、AI 助手 B 寫功能二，互不干擾。
+3. **成果清晰**：AI 完成後，你可以進房間檢查，覺得滿意再搬回客廳大餐桌（合併）。
 
-專案級 agent 可放在 .opencode/agents/，例如 .opencode/agents/implementer.md：
+---
 
-~~~markdown
+## 👥 角色分工
+
+在 OpenCode 的世界裡，有兩種主要角色：
+
+| 角色 | 比喻 | 職責 |
+| :--- | :--- | :--- |
+| **主 Agent** | **組長 / 總指揮** | 負責拆解任務、幫小幫手開闢 Worktree 房間、審查成果並合併。 |
+| **Subagent** | **組員 / 實作小助手** | 專心待在指定房間裡寫程式與做測試，完成後回報給組長。 |
+
+---
+
+## 🚀 5 步驟實戰流程
+
+下面是讓 Subagent 在獨立 Worktree 工作的所有步驟：
+
+```mermaid
+graph TD
+    A["Step 1: 建立獨立書桌 (git worktree add)"] --> B["Step 2: 進入房間並準備環境 (cd & uv sync)"]
+    B --> C["Step 3: 叫小幫手開始幹活 (opencode)"]
+    C --> D["Step 4: 組長檢查並合併成果 (git merge)"]
+    D --> E["Step 5: 清理與收拾書桌 (git worktree remove)"]
+```
+
+### Step 1: 建立獨立書桌 (Worktree)
+
+在主專案目錄下，先確認專案狀態，然後新增一個 Worktree：
+
+```bash
+# 1. 檢查目前狀況
+git status --short
+
+# 2. 建立一個名為 agent/implementer 的分支與獨立資料夾
+git worktree add -b agent/implementer ../worktrees/agent-implementer main
+```
+> 💡 **意思解讀**：我們從 `main` 複製了一份乾淨的程式碼，放在 `../worktrees/agent-implementer` 這個新房間裡。
+
+---
+
+### Step 2: 進入房間並準備環境
+
+進入剛建好的房間，並使用 `uv` 初始化 Python 環境：
+
+```bash
+# 進入新房間
+cd ../worktrees/agent-implementer
+
+# 使用 uv 安裝專案所需的套件與環境
+uv sync --locked
+
+# (選填) 如果專案有用到 Playwright 瀏覽器自動化，執行下式：
+uv run playwright install
+```
+
+---
+
+### Step 3: 喚醒 Subagent 小幫手
+
+在該房間目錄下啟動 OpenCode：
+
+```bash
+opencode
+```
+
+給 Subagent 一個清楚的指令（Prompt 範例）：
+
+> 📝 **給小幫手的任務交代**：
+> 「你現在位於獨立工作區 `agent-implementer`。你的任務是：實作登入頁面表單驗證。請在實作後執行測試命令驗證。完成後請列出修改的檔案與測試結果，不要自行修改其他目錄或直接 push/merge。」
+
+---
+
+### Step 4: 組長驗收與合併成果
+
+當 Subagent 完成工作並回報後，**組長（你或主 Agent）**進行驗收：
+
+```bash
+# 1. 在 Worktree 內提交變更
+git add .
+git commit -m "feat: 新增登入頁面表單驗證"
+
+# 2. 回到主專案大餐桌
+cd ../../2026_06_17_playwright  # 切回你的主專案目錄
+git switch main
+
+# 3. 檢查小幫手做了什麼變更
+git diff main...agent/implementer
+
+# 4. 確認沒問題，正式合併！
+git merge --no-ff agent/implementer
+```
+
+---
+
+### Step 5: 收拾與清理書桌
+
+當任務順利完成並合併後，把不需要的臨時房間與分支刪除，保持環境整潔：
+
+```bash
+# 1. 移除 Worktree 資料夾
+git worktree remove ../worktrees/agent-implementer
+
+# 2. 刪除已合併的臨時分支
+git branch -d agent/implementer
+
+# 3. 清理 Git 殘留紀錄
+git worktree prune
+```
+
+---
+
+### ⚙️ (補充) Subagent 設定檔參考
+
+如果你想在專案中固定 Subagent 的行為，可以在專案的 `.opencode/agents/implementer.md` 放入以下設定：
+
+```markdown
 ---
 description: 在指定 worktree 實作單一功能並執行驗證
 mode: subagent
@@ -26,132 +141,33 @@ permission:
   external_directory: deny
 ---
 
-你只能在主 agent 指定的 worktree 工作。先閱讀需求、AGENTS.md、
-pyproject.toml 與相關程式，再實作指定範圍。不要修改其他 worktree、
-不要 push 或合併。完成後回報修改檔案、commit、驗證命令、結果與剩餘風險。
-~~~
+你只能在主 agent 指定的 worktree 工作。
+請先閱讀需求與相關程式，再實作指定範圍。
+不要修改其他 worktree，不要直接 push 或合併。
+完成後請回報修改檔案、commit 訊息與測試驗證結果。
+```
 
-也可以在 opencode.json 的 agent 區段定義 implementer、reviewer 等角色。設定欄位可能隨 OpenCode 版本變動；正式使用前請以 opencode --help 與該版本官方文件確認。權限設定是安全護欄，不能取代 worktree 隔離與人工審查。
+---
 
-## 建立 Worktree
+## ⚠️ 學生新手常見避坑指南
 
-先在主工作目錄確認 Git 狀態與工具版本：
+1. ❌ **忘記切換目錄**：在主專案裡直接叫 Subagent 改程式，這樣就失去了 Worktree 隔離的效果！
+2. ❌ **密碼與敏感資料跟著提交**：切記不要提交 `.env`、API Key 或個人帳密等私密檔案。
+3. ❌ **重複使用同一個房間名**：每次建立 Worktree 請使用唯一的名稱（例如 `agent-feature-a`），避免覆蓋既有成果。
+4. 💡 **遇到合併衝突怎麼辦？**：如果 AI 改的地方剛好你也改到了，Git 會提示衝突。不要害怕，打開檔案找到 `<<<<<<<` 與 `>>>>>>>` 標記，保留正確的程式碼並重新 commit 即可。
 
-~~~bash
-git status --short
-git worktree list
-uv --version
-opencode --version
-~~~
+---
 
-若主工作目錄有未提交變更，先明確提交、暫存或保留，避免誤帶到新任務。建立一個實作任務用的 worktree：
+## ⚡ 快速指令記憶卡 (Cheatsheet)
 
-~~~bash
-git worktree add -b agent/implementer ../worktrees/agent-implementer main
-~~~
+| 操作 | 指令 |
+| :--- | :--- |
+| **列出所有房間** | `git worktree list` |
+| **建新房間** | `git worktree add -b <分支名> <路徑> main` |
+| **安裝環境** | `uv sync --locked` |
+| **刪除房間** | `git worktree remove <路徑>` |
+| **清理紀錄** | `git worktree prune` |
 
-Git 會自動建立 `../worktrees/agent-implementer` 資料夾，並將 `main` 分支的專案檔案放入其中。執行後可用 `git worktree list` 確認。
+---
 
-每個 branch 與 worktree 路徑都必須唯一。不要使用 -B 或 --force 覆蓋既有成果。若要從遠端最新版本開始，先執行 git fetch origin --prune，確認基準後再建立 worktree。
-
-## 初始化與啟動 Subagent
-
-每個 worktree 都要使用自己的 uv 環境：
-
-~~~bash
-cd ../worktrees/agent-implementer
-uv sync --locked
-uv run python --version
-opencode
-~~~
-
-若本專案需要 Playwright 瀏覽器，另外執行：
-
-~~~bash
-uv run playwright install
-~~~
-
-啟動後提供完整任務資訊：
-
-~~~text
-任務 ID：T-001
-工作目錄：/絕對路徑/../worktrees/agent-implementer
-分支：agent/implementer
-基準 commit：<建立 worktree 時記錄的 commit>
-可修改範圍：<指定目錄或檔案>
-不可修改範圍：其他 worktree、遠端設定、秘密檔案
-驗收：完成指定功能並執行專案實際測試
-交付：列出修改檔案、commit、驗證結果與剩餘風險；不得 push 或合併
-~~~
-
-## 交付、審查與合併
-
-subagent 完成後：
-
-~~~bash
-git status --short
-git diff --check
-# 依專案實際設定執行測試，不要假設一定有 pytest
-uv run <專案測試命令>
-git add <明確列出的檔案>
-git commit -m "feat: implement requested change"
-~~~
-
-主 agent 審查並合併：
-
-~~~bash
-git log --oneline --decorate -1 agent/implementer
-git diff main...agent/implementer
-git switch main
-git merge --no-ff agent/implementer
-~~~
-
-若發生衝突，依任務依賴順序處理；不要以 git reset --hard 或 git checkout -- 直接丟棄變更。
-
-## 清理
-
-確認 branch 已整合、worktree 沒有未提交變更後：
-
-~~~bash
-git -C ../worktrees/agent-implementer status --short
-git worktree remove ../worktrees/agent-implementer
-git branch -d agent/implementer
-git worktree prune
-~~~
-
-清理前若仍需保留成果，請先 commit、建立 patch 或保留 worktree。
-
-## 優點
-
-- **隔離性**：降低 agent 互相覆寫檔案與污染未完成變更的風險。
-- **平行處理**：研究、實作、測試與文件可在任務獨立時同時進行。
-- **可追蹤**：每項成果都有清楚的 branch、commit 與 diff。
-- **容易審查與回復**：主 agent 能逐一檢視小型變更，必要時可單獨重做或回退。
-- **環境干擾較少**：各 worktree 可各自執行 uv sync 與測試。
-
-## 注意事項
-
-- worktree 不能自動解決相同檔案或相同程式區段的合併衝突。
-- 每個 worktree 可能需要獨立同步依賴，會增加磁碟與初始化時間。
-- 不要提交 .env、token、cookie、私鑰或真實敏感測試資料。
-- 若 agent 共用資料庫、服務或 port，請分配獨立資源或使用 mock。
-- uv sync --locked 適合可重現初始化；依賴變更時應同步檢查 pyproject.toml 與 uv.lock。
-
-## 快速驗收
-
-~~~bash
-git diff --check
-uv sync --locked
-uv run python --version
-git worktree list
-~~~
-
-實際 worktree 建立演練需要 repository 的 Git metadata（例如 .git/refs）具備寫入權限。完整驗收條件與風險請參閱 PRD.md。
-
-## 參考資料
-
-- [OpenCode Agents](https://opencode.ai/docs/agents/)
-- [OpenCode Permissions](https://opencode.ai/docs/permissions/)
-- [OpenCode Rules（AGENTS.md）](https://opencode.ai/docs/rules/)
-- [Git git-worktree](https://git-scm.com/docs/git-worktree)
-- [uv sync](https://docs.astral.sh/uv/reference/cli/)
+🎉 **恭喜！** 你已經掌握了使用 Subagent 與 Git Worktree 的精髓，快去試試看讓 AI 小幫手在獨立房間為你寫程式吧！
