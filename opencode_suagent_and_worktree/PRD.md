@@ -363,3 +363,7 @@ git worktree prune --dry-run
 - [OpenCode Rules（AGENTS.md）](https://opencode.ai/docs/rules/)
 - [Git git-worktree](https://git-scm.com/docs/git-worktree)
 - [uv sync](https://docs.astral.sh/uv/reference/cli/)
+
+## 15. 測試備註
+
+本節用於驗證 subagent 是否能在指定 worktree 中更新 PRD 文件。
